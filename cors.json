@@ -1,6 +1,6 @@
 [
     {
-      "origin": ["http://localhost:3000/"],
+      "origin": ["https://gallery.devshaad.com/"],
       "method": ["GET"],
       "responseHeader": ["Content-Type"],
       "maxAgeSeconds": 3600
