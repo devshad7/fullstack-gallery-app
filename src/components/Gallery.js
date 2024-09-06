@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { collection, onSnapshot } from "firebase/firestore";
-import { auth, db } from "@/lib/firebase"; // Ensure the path to your firebase configuration is correct
+import { auth, db, storage } from "@/lib/firebase"; // Ensure the path to your firebase configuration is correct
 import { onAuthStateChanged } from "firebase/auth";
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import NoImages from "./NoImages";
@@ -8,6 +8,7 @@ import Loader from "./Loader";
 import { DownloadIcon } from "lucide-react";
 import { Button } from "./ui/button";
 import toast from "react-hot-toast";
+import { getDownloadURL, ref } from "firebase/storage";
 
 const Gallery = ({ user }) => {
     const [images, setImages] = useState([]);
@@ -36,27 +37,34 @@ const Gallery = ({ user }) => {
         })
     }, [user])
 
-    // Function to handle image download
-    const handleDownload = (url, name) => {
-        // Fetch the image as a blob and then download it
-        fetch(url)
-            .then(response => response.blob())
-            .then(blob => {
+    const handleDownload = (path, name) => {
+        if (!path) return;
+
+        const imageRef = ref(storage, path);
+
+        getDownloadURL(imageRef)
+            .then((url) => {
+                return fetch(url);
+            })
+            .then((response) => response.blob())
+            .then((blob) => {
+                const downloadUrl = window.URL.createObjectURL(blob);
                 const link = document.createElement('a');
-                const blobUrl = URL.createObjectURL(blob);
-                link.href = blobUrl;
-                link.download = name; // Set the filename for the download
+                link.href = downloadUrl;
+                link.setAttribute('download', name);
                 document.body.appendChild(link);
                 link.click();
-                document.body.removeChild(link);
-                URL.revokeObjectURL(blobUrl); // Clean up the object URL after download
-                toast.success('Donwloaded')
+
+                link.parentNode.removeChild(link);
+                window.URL.revokeObjectURL(downloadUrl);
+                toast.success('Downloaded')
             })
-            .catch(error => {
+            .catch((error) => {
                 console.error('Error downloading the image:', error);
-                toast.error('Something went wrong...')
+                toast.error('Failed to download image.');
             });
     };
+
 
     if (loading) return <Loader />;
 
