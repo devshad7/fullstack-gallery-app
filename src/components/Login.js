@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { signInWithEmailAndPassword } from "firebase/auth"
 import { auth } from "@/lib/firebase"
+import toast from "react-hot-toast"
 
 const Login = () => {
 
@@ -51,6 +52,7 @@ const Login = () => {
             router.push('/')
         }).catch((err) => {
             console.log(err.message);
+            toast.error('Something went wrong...')
         })
     }
 

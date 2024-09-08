@@ -5,7 +5,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import NoImages from "./NoImages";
 import Loader from "./Loader";
-import { DownloadIcon } from "lucide-react";
+import { BookmarkIcon, DownloadIcon, LinkIcon, ShareIcon } from "lucide-react";
 import { Button } from "./ui/button";
 import toast from "react-hot-toast";
 import { getDownloadURL, ref } from "firebase/storage";
@@ -37,6 +37,7 @@ const Gallery = ({ user }) => {
         })
     }, [user])
 
+    // download button function
     const handleDownload = (path, name) => {
         if (!path) return;
 
@@ -65,35 +66,66 @@ const Gallery = ({ user }) => {
             });
     };
 
+    // copy link button function 
+    const handleCopy = (url) => {
+        navigator.clipboard.writeText(url)
+            .then(() => {
+                toast.success('Copied')
+            })
+            .catch((err) => {
+                toast.error("Failed to copy. Try again")
+            });
+    };
+
 
     if (loading) return <Loader />;
 
     return (
         <>
             {images.length > 0 ? (
-                <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 p-4 md:p-6">
+                <div className="columns-2 md:columns-3 lg:columns-4 xl:columns-6 gap-4 p-4 md:p-6">
                     {images.map((image, index) => (
-                        <Dialog key={index}>
-                            <DialogTrigger>
-                                <img
-                                    src={image.url}
-                                    alt={image.name}
-                                    className="object-cover w-full rounded-lg overflow-hidden"
-                                />
-                            </DialogTrigger>
-                            <DialogContent className="w-[400px] md:w-1/3 rounded-md">
-                                <DialogTitle className='hidden' />
-                                <img
-                                    src={image.url}
-                                    alt={image.name}
-                                />
-                                <DialogDescription>
-                                    <button onClick={() => handleDownload(image.url, image.name)}>
-                                        <DownloadIcon size={18} />
-                                    </button>
-                                </DialogDescription>
-                            </DialogContent>
-                        </Dialog>
+                        <div key={index} className="break-inside-avoid mb-4">
+                            <Dialog>
+                                <DialogTrigger>
+                                    <img
+                                        src={image.url}
+                                        alt={image.name}
+                                        className="w-full rounded-lg overflow-hidden"
+                                    />
+                                </DialogTrigger>
+                                <DialogContent className="w-[400px] md:w-[30%] rounded-md">
+                                    <DialogTitle className="hidden" />
+                                    <div className="flex justify-center items-center">
+                                        <img
+                                            src={image.url}
+                                            alt={image.name}
+                                            className="w-full h-full object-contain"
+                                        />
+                                    </div>
+                                    <div>
+                                        <div className="flex justify-between">
+                                            <div className="flex gap-3">
+                                                <button onClick={() => handleDownload(image.url, image.name)}>
+                                                    <DownloadIcon size={18} />
+                                                </button>
+                                                <button onClick={() => handleCopy(image.url)}>
+                                                    <LinkIcon size={18} />
+                                                </button>
+                                                <button>
+                                                    <ShareIcon size={18} />
+                                                </button>
+                                            </div>
+                                            <div className="">
+                                                <button>
+                                                    <BookmarkIcon size={18} />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </DialogContent>
+                            </Dialog>
+                        </div>
                     ))}
                 </div>
             ) : (
